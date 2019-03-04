@@ -10,7 +10,7 @@
     "separator": "\t",
     "columns": ["isin", "billingSegmentDesc"],
     "aliases": ["ISIN Code (Xref)", "SWX Billing Product Segment"],
-    "filter": {
+    "filters": {
       "securityTypeDesc": [
         "Exchange Traded Fund",
         "Exchange Traded Products",
@@ -18,5 +18,17 @@
         "Unit Trust"
       ]
     }
+  },
+  {
+    "title": "Restricted for sale in US (AT)",
+    "protocol": "ftp",
+    "host": "143.245.6.3",
+    "filename": "i_stammdatenkat_v_gesamt.csv",
+    "encoding": "utf8",
+    "authentication": {
+
+    },
+    "columns": ["ISIN", "Nicht Vertrieb - US Personen"],
+    "aliases": ["ISIN Code (Xref)", "Restricted for sale in US"]
   }
 ]
