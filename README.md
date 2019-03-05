@@ -1,5 +1,16 @@
 # Web Data Extractor
 
+- [Web Data Extractor](#web-data-extractor)
+  - [Configuration](#configuration)
+    - [Required Settings](#required-settings)
+      - [`title`](#title)
+      - [`url` or `host`](#url-or-host)
+      - [`filename` (FTP)](#filename-ftp)
+    - [Optional Settings](#optional-settings)
+      - [`dateFormat`](#dateformat)
+      - [`authentication`](#authentication)
+ 
+
 Tool to extract tabular data from files on the web.
 
 Supports fetching data through HTTP or FTP.
