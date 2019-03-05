@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import time
+import msvcrt
 
 from pick import pick
 from termcolor import cprint, colored
@@ -47,8 +48,7 @@ def get_config(path_to_config):
                            options_map_func=title_map)
         return option
     else:
-        cprint('No configurations available!', "red")
-        restart()
+        restart(colored('No configurations available!', "red"))
 
 
 def run_tool():
@@ -56,14 +56,16 @@ def run_tool():
     (option, _) = pick(["Extract Data", "Exit"], prompt, indicator="=>")
 
     if option == "Exit":
-        sys.exit(colored("Bye!", "blue"))
+        sys.exit(colored("Bye!", "green"))
 
     if option == "Extract Data":
         extract_data()
 
 
-def restart():
-    time.sleep(2)
+def restart(status):
+    print(status)
+    print("Press any key to continue...")
+    msvcrt.getch()
     run_tool()
 
 

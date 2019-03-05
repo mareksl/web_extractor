@@ -116,3 +116,5 @@ dmypy.json
 .pyre/
 
 dummy_data
+icon.ico
+output

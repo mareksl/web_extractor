@@ -8,7 +8,7 @@ from ftplib import FTP
 import pandas as pd
 import requests
 from halo import Halo
-from termcolor import cprint
+from termcolor import cprint, colored
 
 
 class Extractor:
@@ -27,8 +27,7 @@ class Extractor:
                 self.host = config["host"]
 
         except KeyError:
-            cprint("Invalid configuration", "red")
-            self.restart()
+            self.restart(colored("Invalid configuration", "red"))
 
         self.date_format = config.get("dateFormat", "%Y%m%d")
         self.authentication = config.get("authentication", None)
@@ -67,16 +66,18 @@ class Extractor:
         value = re.sub(r'[^\w\s-]', '', value).strip().lower()
         return re.sub(r'[-\s]+', '-', value)
 
-    @Halo(text="Getting file", spinner="simpleDotsScrolling")
     def get_file(self):
+        spinner = Halo(text='Getting File', spinner='simpleDotsScrolling')
+        spinner.start()
         try:
             authentication = (
                 (self.authentication["username"],
                  self.authentication["password"]) if self.authentication
                 else None)
         except KeyError as e:
-            cprint("Invalid authentication details: {}".format(e), "red")
-            self.restart()
+            spinner.stop()
+            self.restart(
+                colored("Invalid authentication details: {}".format(e), "red"))
 
         try:
             if self.protocol == "http":
@@ -95,29 +96,37 @@ class Extractor:
                 data = self.__get_file_ftp(ftp, self.filename)
 
         except Exception as e:
-            cprint("Could not get file: {}".format(e), "red")
-            self.restart()
+            spinner.stop()
+            self.restart(colored("Could not get file: {}".format(e), "red"))
 
+        spinner.stop()
         return data
 
-    @Halo(text="Extracting", spinner="simpleDotsScrolling")
     def extract_data(self, raw_data):
-        csv_data = pd.read_csv(raw_data,
-                               sep=self.separator)
-        if self.filters:
-            for key, value in self.filters.items():
-                csv_data = csv_data[csv_data[key].isin(value)]
+        spinner = Halo(text='Extracting', spinner='simpleDotsScrolling')
+        spinner.start()
+        try:
+            csv_data = pd.read_csv(raw_data,
+                                   sep=self.separator)
+            if self.filters:
+                for key, value in self.filters.items():
+                    csv_data = csv_data[csv_data[key].isin(value)]
 
-        if len(self.columns) > 0:
-            csv_data = csv_data[self.columns]
+            if len(self.columns) > 0:
+                csv_data = csv_data[self.columns]
 
-        return csv_data.rename(
-            columns=dict(
-                zip(
-                    self.columns,
-                    self.aliases
-                )
-            ))
+            spinner.stop()
+            return csv_data.rename(
+                columns=dict(
+                    zip(
+                        self.columns,
+                        self.aliases
+                    )
+                ))
+        except Exception as e:
+            spinner.stop()
+            self.restart(
+                colored("Unable to extract data: {}".format(e), "red"))
 
     def save_file(self, data):
         spinner = Halo(text='Saving', spinner='simpleDotsScrolling')
@@ -135,5 +144,4 @@ class Extractor:
                 self.date),
             index=False, encoding=self.encoding)
         spinner.stop()
-        cprint('Successfully extracted data!', "green")
-        self.restart()
+        self.restart(colored('Successfully extracted data!', "green"))
