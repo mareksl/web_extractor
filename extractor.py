@@ -2,17 +2,19 @@ import datetime
 import io
 import os
 import re
-import sys
 import unicodedata
 from ftplib import FTP
 
 import pandas as pd
 import requests
+from halo import Halo
+from termcolor import cprint
 
 
 class Extractor:
 
-    def __init__(self, config):
+    def __init__(self, config, restart):
+        self.restart = restart
         self.protocol = config.get("protocol", "http")
 
         try:
@@ -25,7 +27,8 @@ class Extractor:
                 self.host = config["host"]
 
         except KeyError:
-            sys.exit("Invalid configuration")
+            cprint("Invalid configuration", "red")
+            self.restart()
 
         self.date_format = config.get("dateFormat", "%Y%m%d")
         self.authentication = config.get("authentication", None)
@@ -64,6 +67,7 @@ class Extractor:
         value = re.sub(r'[^\w\s-]', '', value).strip().lower()
         return re.sub(r'[-\s]+', '-', value)
 
+    @Halo(text="Getting file", spinner="simpleDotsScrolling")
     def get_file(self):
         try:
             authentication = (
@@ -71,7 +75,8 @@ class Extractor:
                  self.authentication["password"]) if self.authentication
                 else None)
         except KeyError as e:
-            sys.exit("Invalid authentication details: {}".format(e))
+            cprint("Invalid authentication details: {}".format(e), "red")
+            self.restart()
 
         try:
             if self.protocol == "http":
@@ -90,10 +95,12 @@ class Extractor:
                 data = self.__get_file_ftp(ftp, self.filename)
 
         except Exception as e:
-            sys.exit("Could not get file: {}".format(e))
+            cprint("Could not get file: {}".format(e), "red")
+            self.restart()
 
         return data
 
+    @Halo(text="Extracting", spinner="simpleDotsScrolling")
     def extract_data(self, raw_data):
         csv_data = pd.read_csv(raw_data,
                                sep=self.separator)
@@ -113,6 +120,8 @@ class Extractor:
             ))
 
     def save_file(self, data):
+        spinner = Halo(text='Saving', spinner='simpleDotsScrolling')
+        spinner.start()
         filename_slug = self.__slugify(self.title)
         directory = "./output/{}".format(filename_slug)
 
@@ -125,3 +134,6 @@ class Extractor:
                 filename_slug,
                 self.date),
             index=False, encoding=self.encoding)
+        spinner.stop()
+        cprint('Successfully extracted data!', "green")
+        self.restart()
