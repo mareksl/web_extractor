@@ -24,11 +24,9 @@
     "protocol": "ftp",
     "host": "143.245.6.3",
     "filename": "i_stammdatenkat_v_gesamt.csv",
-    "encoding": "utf8",
+    "encoding": "iso-8859-1",
     "authentication": {
-
-    },
-    "columns": ["ISIN", "Nicht Vertrieb - US Personen"],
-    "aliases": ["ISIN Code (Xref)", "Restricted for sale in US"]
+      
+    }
   }
 ]

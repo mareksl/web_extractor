@@ -86,7 +86,10 @@ class Extractor:
             for key, value in self.filters.items():
                 csv_data = csv_data[csv_data[key].isin(value)]
 
-        return csv_data[self.columns].rename(
+        if len(self.columns) > 0:
+            csv_data = csv_data[self.columns]
+
+        return csv_data.rename(
             columns=dict(
                 zip(
                     self.columns,
@@ -105,4 +108,4 @@ class Extractor:
                 directory,
                 self.title,
                 self.date),
-            index=False)
+            index=False, encoding=self.encoding)
