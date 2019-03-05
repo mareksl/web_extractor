@@ -1,6 +1,7 @@
 # Web Data Extractor
 
 - [Web Data Extractor](#web-data-extractor)
+  - [Download](#download)
   - [Running the program](#running-the-program)
   - [Configuration](#configuration)
     - [Required Settings](#required-settings)
@@ -23,6 +24,12 @@ Tool for extracting tabular data from files on the web.
 Supports fetching data through __HTTP__ or __FTP__.
 
 The program processes the data from the file provided in the configuration, filters it by a given column, extracts only the required columns provided in the configuration and outputs a csv file with the extracted data to the output folder.
+
+
+## Download
+
+You can download the latest release [__here__](https://github.com/mareksl/web_extractor/releases/latest).
+
 
 ## Running the program
 

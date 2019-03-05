@@ -26,6 +26,8 @@
     "authentication": {
       "username": "reuters",
       "password": "01reu12"
-    }
+    },
+    "columns":["ISIN","Nicht Vertrieb - US Personen"],
+    "aliases":["ISIN Code (Xref)", "Restricted for sale in US"]
   }
 ]
