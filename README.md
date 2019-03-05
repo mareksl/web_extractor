@@ -50,10 +50,12 @@ Multiple configurations may be included in the config file in the following form
 
 Full list of available configuration options below.
 
+---
 
 ### Required Settings
 
 This is the minimal information that has to be provided in order for the program to work. Depending on the source of the data, youmay have to provide [authentication](#authentication) and/or [encoding](#encoding) details.
+
 
 #### `title`
 
@@ -64,6 +66,7 @@ Example:
 "title": "Sample Title"
 ```
 
+---
 
 #### `url` or `host`
 
@@ -90,6 +93,7 @@ Example:
 "host": "192.168.0.1"
 ```
 
+---
 
 #### `filename` (FTP)
 
@@ -100,10 +104,12 @@ Example:
 "filename": "example.csv"
 ```
 
+---
 
 ### Optional Settings
 
 These setitngs are optional, but [authentication](#authentication) and/or [encoding](#encoding) details may have to be provided for certain sources.
+
 
 #### `dateFormat`
 
@@ -116,6 +122,7 @@ Example:
 
 In this example, the date 25. March 2019 will be formatted as: _20190328_.
 
+---
 
 #### `authentication`
 
@@ -129,6 +136,7 @@ Example:
 }
 ```
 
+---
 
 #### `encoding`
 
@@ -139,6 +147,7 @@ Example:
 "encoding": "iso-8859-1"
 ```
 
+---
 
 #### `separator`
 
@@ -149,6 +158,7 @@ Example:
 "separator": "\t"
 ```
 
+---
 
 #### `filters`
 
@@ -168,6 +178,7 @@ Example:
 }
 ```
 
+---
 
 #### `columns`
 
@@ -178,6 +189,7 @@ Example:
 "columns": ["column1", "column3"]
 ```
 
+---
 
 #### `aliases`
 
@@ -187,6 +199,8 @@ Example:
 ```
 "aliases": ["renamedColumn1", "renamedColumn2"]
 ```
+
+---
 
 ## License
 [MIT](https:/github.com/mareksl/swx_tool/LICENSE)
