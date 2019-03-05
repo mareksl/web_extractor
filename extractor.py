@@ -1,7 +1,9 @@
 import datetime
 import io
 import os
+import re
 import sys
+import unicodedata
 from ftplib import FTP
 
 import pandas as pd
@@ -48,6 +50,19 @@ class Extractor:
         byte_str = output.read()
         decoded = byte_str.decode(self.encoding)
         return io.StringIO(decoded)
+
+    def __slugify(self, value):
+        """
+        Convert to ASCII if 'allow_unicode' is False.
+        Convert spaces to hyphens.
+        Remove characters that aren't alphanumerics, underscores, or hyphens.
+        Convert to lowercase. Also strip leading and trailing whitespace.
+        """
+        value = str(value)
+        value = unicodedata.normalize('NFKD', value).encode(
+            'ascii', 'ignore').decode('ascii')
+        value = re.sub(r'[^\w\s-]', '', value).strip().lower()
+        return re.sub(r'[-\s]+', '-', value)
 
     def get_file(self):
         try:
@@ -98,7 +113,8 @@ class Extractor:
             ))
 
     def save_file(self, data):
-        directory = "./{}".format(self.title)
+        filename_slug = self.__slugify(self.title)
+        directory = "./output/{}".format(filename_slug)
 
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -106,6 +122,6 @@ class Extractor:
         data.to_csv(
             "{}/{}_{}.csv".format(
                 directory,
-                self.title,
+                filename_slug,
                 self.date),
             index=False, encoding=self.encoding)

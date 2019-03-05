@@ -3,9 +3,7 @@
     "title": "SWX Billing Product Segment",
     "url": "https://www.exfeed.com/client_area/download/rdi/{date}/TradedInstrument_{date}.txt",
     "dateFormat": "%Y%m%d",
-    "authentication": {
-
-    },
+    "authentication": {},
     "encoding": "iso-8859-1",
     "separator": "\t",
     "columns": ["isin", "billingSegmentDesc"],
@@ -26,7 +24,8 @@
     "filename": "i_stammdatenkat_v_gesamt.csv",
     "encoding": "iso-8859-1",
     "authentication": {
-      
+      "username": "reuters",
+      "password": "01reu12"
     }
   }
 ]
