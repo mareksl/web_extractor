@@ -37,14 +37,12 @@ The program processes the data from the file provided in the configuration, filt
 A config.json file is required to run the extractor.
 Multiple configurations may be included in the config file in the following form:
 
-```
+```json
 [
     {
         "title": "Example configuration",
-        "url": "http://www.example.com",
-        // ...
-    },
-    // ...
+        "url": "http://www.example.com"
+    }
 ]
 ```
 
@@ -62,7 +60,7 @@ This is the minimal information that has to be provided in order for the program
 The title of the configuration.
 
 Example:
-```
+```json
 "title": "Sample Title"
 ```
 
@@ -75,21 +73,21 @@ The url (_http_) or host (_ftp_) of the configuration.
 __For http__: use whole path together with file name and extension.
 
 Example:
-```
+```json
 "url": "http://www.example.com/example.csv"
 ```
 
 You can provide a placeholder for the current date in the url between curly braces. This will be replaced by today's date in the format you specify in the [`dateFormat`](#dateFormat) option.
 
 Example:
-```
+```json
 "url": "http://www.example.com/file_from_today_{date}.csv"
 ```
 
 __For ftp__: use only hostname, without file name and extension. [Filename](#filename-(FTP)) provided in seperate option.
 
 Example:
-```
+```json
 "host": "192.168.0.1"
 ```
 
@@ -100,7 +98,7 @@ Example:
 When using the FTP protocol, the name of the file to be extracted is also required.
 
 Example:
-```
+```json
 "filename": "example.csv"
 ```
 
@@ -116,7 +114,7 @@ These setitngs are optional, but [authentication](#authentication) and/or [encod
 Format of the date to be embedded in url (HTTP only). `dateFormat` has to be provided using Python's `strftime` directives. [Refer to this list of available directives.](http://strftime.org/)
 
 Example:
-```
+```json
 "dateFormat": "%Y%m%d"
 ```
 
@@ -129,7 +127,7 @@ In this example, the date 25. March 2019 will be formatted as: _20190328_.
 Basic authentication details including `username` and `password`.
 
 Example:
-```
+```json
 "authentication": {
     "username": "exampleUser",
     "password": "examplePassword"
@@ -143,7 +141,7 @@ Example:
 The text encoding of the file to be extracted. Defaults to __`utf8`__.
 
 Example:
-```
+```json
 "encoding": "iso-8859-1"
 ```
 
@@ -154,7 +152,7 @@ Example:
 The characted used as separator in the file. Use `\t` for tabs. Defaults to __`;`__.
 
 Example:
-```
+```json
 "separator": "\t"
 ```
 
@@ -165,7 +163,7 @@ Example:
 The columns and values by which to filter in the form of an object with the name of the column as the key and a list of strings to filter by as value.
 
 Example:
-```
+```json
 "filters": {
     "column1": [
         "value1",
@@ -185,7 +183,7 @@ Example:
 A list of columns to be included in result. All columns will be included if left blank.
 
 Example:
-```
+```json
 "columns": ["column1", "column3"]
 ```
 
@@ -196,7 +194,7 @@ Example:
 A list of aliases for the included columns in their order. If no aliases provided, the columns will keep the names from the original file.
 
 Example:
-```
+```json
 "aliases": ["renamedColumn1", "renamedColumn2"]
 ```
 
