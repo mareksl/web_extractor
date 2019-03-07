@@ -15,7 +15,6 @@ path_to_config = "./config.json"
 
 def extract_data():
     config = get_config(path_to_config)
-
     extractor = Extractor(config, restart)
 
     raw_data = extractor.get_file()
@@ -28,7 +27,7 @@ def title_map(option):
     try:
         title = option["title"]
     except:
-        cprint("Invalid configuration", "red")
+        cprint("Invalid configuration. No title set.", "red")
     return title
 
 

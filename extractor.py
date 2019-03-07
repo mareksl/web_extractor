@@ -8,7 +8,9 @@ from ftplib import FTP
 import pandas as pd
 import requests
 from halo import Halo
-from termcolor import cprint, colored
+from termcolor import colored, cprint
+
+from utils import slugify
 
 
 class Extractor:
@@ -44,56 +46,58 @@ class Extractor:
         now = datetime.datetime.now()
         return now.strftime(self.date_format)
 
-    def __get_file_ftp(self, ftp, filename):
+    def __get_fetcher(self, protocol):
+        if protocol == 'ftp':
+            return self.__fetch_file_ftp
+        elif protocol == 'http':
+            return self.__fetch_file_http
+        else:
+            raise ValueError(property)
+
+    def __fetch_file_http(self, auth=None):
+        data_file = requests.get(
+            self.url.format(date=self.date),
+            auth=auth
+        ).content
+
+        data = io.StringIO(data_file.decode(self.encoding))
+        return data
+
+    def __fetch_file_ftp(self, auth=None):
+        ftp = FTP(self.host)
+
+        if auth:
+            ftp.login(auth[0], auth[1])
+
         output = io.BytesIO()
-        ftp.retrbinary('RETR ' + filename, output.write)
+        ftp.retrbinary('RETR ' + self.filename, output.write)
         ftp.quit()
         output.seek(0)
         byte_str = output.read()
         decoded = byte_str.decode(self.encoding)
         return io.StringIO(decoded)
 
-    def __slugify(self, value):
-        """
-        Convert to ASCII if 'allow_unicode' is False.
-        Convert spaces to hyphens.
-        Remove characters that aren't alphanumerics, underscores, or hyphens.
-        Convert to lowercase. Also strip leading and trailing whitespace.
-        """
-        value = str(value)
-        value = unicodedata.normalize('NFKD', value).encode(
-            'ascii', 'ignore').decode('ascii')
-        value = re.sub(r'[^\w\s-]', '', value).strip().lower()
-        return re.sub(r'[-\s]+', '-', value)
-
     def get_file(self):
         spinner = Halo(text='Getting File', spinner='simpleDotsScrolling')
         spinner.start()
+
         try:
             authentication = (
                 (self.authentication["username"],
                  self.authentication["password"]) if self.authentication
                 else None)
+
         except KeyError as e:
             spinner.stop()
             self.restart(
                 colored("Invalid authentication details: {}".format(e), "red"))
 
         try:
-            if self.protocol == "http":
-                data_file = requests.get(
-                    self.url.format(date=self.date),
-                    auth=authentication
-                ).content
-                data = io.StringIO(data_file.decode(self.encoding))
-                # data_file = open("./dummy_data/TradedInstrument.txt",
-                #                  "r", encoding=self.encoding)
-                # data = data_file
-            if self.protocol == "ftp":
-                ftp = FTP(self.host)
-                if authentication:
-                    ftp.login(authentication[0], authentication[1])
-                data = self.__get_file_ftp(ftp, self.filename)
+            fetch = self.__get_fetcher(self.protocol)
+            data = fetch(authentication)
+            # data_file = open("./dummy_data/TradedInstrument.txt",
+            #                  "r", encoding=self.encoding)
+            # data = data_file
 
         except Exception as e:
             spinner.stop()
@@ -131,7 +135,7 @@ class Extractor:
     def save_file(self, data):
         spinner = Halo(text='Saving', spinner='simpleDotsScrolling')
         spinner.start()
-        filename_slug = self.__slugify(self.title)
+        filename_slug = slugify(self.title)
         directory = "./output/{}".format(filename_slug)
 
         if not os.path.exists(directory):
