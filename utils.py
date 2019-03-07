@@ -1,3 +1,8 @@
+import io
+import re
+import unicodedata
+
+
 def slugify(value):
     """
     Convert to ASCII if 'allow_unicode' is False.
@@ -10,3 +15,7 @@ def slugify(value):
         'ascii', 'ignore').decode('ascii')
     value = re.sub(r'[^\w\s-]', '', value).strip().lower()
     return re.sub(r'[-\s]+', '-', value)
+
+
+def decode_content(content, encoding):
+    return io.StringIO(content.decode(encoding))

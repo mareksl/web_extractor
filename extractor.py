@@ -1,35 +1,38 @@
 import datetime
-import io
 import os
-import re
-import unicodedata
-from ftplib import FTP
 
 import pandas as pd
-import requests
 from halo import Halo
 from termcolor import colored, cprint
 
-from utils import slugify
+from file_fetcher import FileFetcher
+from utils import decode_content, slugify
 
 
 class Extractor:
 
     def __init__(self, config, restart):
         self.restart = restart
-        self.protocol = config.get("protocol", "http")
-
         try:
             self.title = config["title"]
-
-            if self.protocol == "http":
-                self.url = config["url"]
-
-            if self.protocol == "ftp":
-                self.host = config["host"]
-
         except KeyError:
-            self.restart(colored("Invalid configuration", "red"))
+            self.restart(
+                colored("Invalid configuration. Title missing.", "red"))
+
+        self.protocol = config.get("protocol", "http")
+
+        self.url = config.get("url", None)
+        self.__build_url_date()
+
+        self.host = config.get("host", None)
+        self.filename = config.get("filename", None)
+
+        if self.url is None and (self.host is None or self.filename is None):
+            self.restart(
+                colored(
+                    "Invalid configuration. Check url or host and filename.",
+                    "red")
+            )
 
         self.date_format = config.get("dateFormat", "%Y%m%d")
         self.authentication = config.get("authentication", None)
@@ -38,7 +41,6 @@ class Extractor:
         self.columns = config.get("columns", [])
         self.aliases = config.get("aliases", [])
         self.filters = config.get("filters", None)
-        self.filename = config.get("filename", None)
 
         self.date = self.__set_date()
 
@@ -46,55 +48,19 @@ class Extractor:
         now = datetime.datetime.now()
         return now.strftime(self.date_format)
 
-    def __get_fetcher(self, protocol):
-        if protocol == 'ftp':
-            return self.__fetch_file_ftp
-        elif protocol == 'http':
-            return self.__fetch_file_http
-        else:
-            raise ValueError(property)
+    def __build_url_date(self):
+        if self.url:
+            self.url = self.url.format(date=self.date)
 
-    def __fetch_file_http(self, auth=None):
-        data_file = requests.get(
-            self.url.format(date=self.date),
-            auth=auth
-        ).content
-
-        data = io.StringIO(data_file.decode(self.encoding))
-        return data
-
-    def __fetch_file_ftp(self, auth=None):
-        ftp = FTP(self.host)
-
-        if auth:
-            ftp.login(auth[0], auth[1])
-
-        output = io.BytesIO()
-        ftp.retrbinary('RETR ' + self.filename, output.write)
-        ftp.quit()
-        output.seek(0)
-        byte_str = output.read()
-        decoded = byte_str.decode(self.encoding)
-        return io.StringIO(decoded)
-
-    def get_file(self):
+    def get_file_contents(self):
         spinner = Halo(text='Getting File', spinner='simpleDotsScrolling')
         spinner.start()
 
         try:
-            authentication = (
-                (self.authentication["username"],
-                 self.authentication["password"]) if self.authentication
-                else None)
-
-        except KeyError as e:
-            spinner.stop()
-            self.restart(
-                colored("Invalid authentication details: {}".format(e), "red"))
-
-        try:
-            fetch = self.__get_fetcher(self.protocol)
-            data = fetch(authentication)
+            fetcher = FileFetcher.create(
+                self.protocol, self.url, self.host, self.filename)
+            data = fetcher.fetch(self.authentication)
+            decoded_data = decode_content(data, self.encoding)
             # data_file = open("./dummy_data/TradedInstrument.txt",
             #                  "r", encoding=self.encoding)
             # data = data_file
@@ -104,11 +70,12 @@ class Extractor:
             self.restart(colored("Could not get file: {}".format(e), "red"))
 
         spinner.stop()
-        return data
+        return decoded_data
 
     def extract_data(self, raw_data):
         spinner = Halo(text='Extracting', spinner='simpleDotsScrolling')
         spinner.start()
+
         try:
             csv_data = pd.read_csv(raw_data,
                                    sep=self.separator)
@@ -127,6 +94,7 @@ class Extractor:
                         self.aliases
                     )
                 ))
+
         except Exception as e:
             spinner.stop()
             self.restart(

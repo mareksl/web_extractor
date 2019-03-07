@@ -17,7 +17,7 @@ def extract_data():
     config = get_config(path_to_config)
     extractor = Extractor(config, restart)
 
-    raw_data = extractor.get_file()
+    raw_data = extractor.get_file_contents()
     extracted_data = extractor.extract_data(raw_data)
 
     extractor.save_file(extracted_data)
